@@ -1,0 +1,18 @@
+[project]
+name = "whalers-dv-discord-bot"
+version = "0.1.0"
+description = "A Discord Bot for weekly zone registration - Slayer Legend"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "discord.py>=2.3.2",
+    "boto3>=1.28.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "PyNaCl>=1.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+]
