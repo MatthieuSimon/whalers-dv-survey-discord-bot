@@ -1,18 +1,25 @@
 import boto3
 from botocore.exceptions import ClientError
 import config
+
 class RegistrationDB:
     """Manages storing zone registrations in a DynamoDB table where 'zone' is the primary key."""
     VALID_ZONES = ["Fire", "Water", "Earth", "Wind", "Whatever"]
     def __init__(self, table_name=None, endpoint_url=None):
         self.table_name = table_name or config.DYNAMODB_TABLE_NAME
         self.endpoint_url = endpoint_url or config.DYNAMODB_ENDPOINT_URL
-        # Setup AWS session parameters dynamically
+        # Setup AWS session parameters dynamically. If explicit credentials are provided,
+        # require both access key and secret key to avoid partial/malformed credential injection.
         params = {}
-        if config.AWS_ACCESS_KEY_ID:
+        if config.AWS_ACCESS_KEY_ID or config.AWS_SECRET_ACCESS_KEY or config.AWS_SESSION_TOKEN:
+            if not (config.AWS_ACCESS_KEY_ID and config.AWS_SECRET_ACCESS_KEY):
+                raise ValueError(
+                    "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must both be set when manually configuring AWS credentials."
+                )
             params['aws_access_key_id'] = config.AWS_ACCESS_KEY_ID
-        if config.AWS_SECRET_ACCESS_KEY:
             params['aws_secret_access_key'] = config.AWS_SECRET_ACCESS_KEY
+            if config.AWS_SESSION_TOKEN:
+                params['aws_session_token'] = config.AWS_SESSION_TOKEN
         if config.AWS_DEFAULT_REGION:
             params['region_name'] = config.AWS_DEFAULT_REGION
         if self.endpoint_url:

@@ -30,8 +30,9 @@ Configure the following values in AWS Lambda or local `.env` for development:
 - `DISCORD_PUBLIC_KEY` — your Discord application's public key
 - `SURVEY_CHANNEL_ID` — numeric ID of the target channel
 - `DYNAMODB_TABLE_NAME` — DynamoDB table name
-- `AWS_ACCESS_KEY_ID` — AWS credentials for DynamoDB access
-- `AWS_SECRET_ACCESS_KEY` — AWS credentials for DynamoDB access
+- `AWS_ACCESS_KEY_ID` — AWS credentials for DynamoDB access (optional when using Lambda execution role)
+- `AWS_SECRET_ACCESS_KEY` — AWS credentials for DynamoDB access (optional when using Lambda execution role)
+- `AWS_SESSION_TOKEN` — AWS session token for temporary credentials, required if using STS-based credentials
 - `AWS_DEFAULT_REGION` — AWS region (default: `us-east-1`)
 - `DYNAMODB_ENDPOINT_URL` — optional local DynamoDB endpoint for testing
 

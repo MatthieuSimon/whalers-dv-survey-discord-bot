@@ -42,7 +42,7 @@ jobs:
           mkdir -p package
           SITE_PACKAGES=$(uv run python -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
           cp -r "$SITE_PACKAGES"/* package/
-          cp lambda_publish.py lambda_interactions.py config.py db.py survey_payload.py send_survey.py package/
+          cp lambda_publish.py lambda_interactions.py config.py db.py survey_payload.py package/
       - name: Create deployment zip
         run: |
           cd package
