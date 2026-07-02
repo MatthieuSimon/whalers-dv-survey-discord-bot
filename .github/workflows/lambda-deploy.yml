@@ -40,19 +40,28 @@ jobs:
       - name: Export requirements
         run: |
           uv export --no-dev --no-hashes -o requirements.txt
-      - name: Prepare deployment package
+      - name: Prepare publish deployment package
         run: |
-          mkdir -p package
-          pip install -r requirements.txt -t package/ --platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 314
-          cp lambda_publish.py lambda_interactions.py config.py db.py survey_payload.py package/
-      - name: Create deployment zip
+          mkdir -p package_publish
+          pip install -r requirements.txt -t package_publish/ --platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 314
+          cp lambda_publish.py config.py db.py survey_payload.py package_publish/
+      - name: Prepare interactions deployment package
         run: |
-          cd package
-          zip -r ../lambda-deployment.zip .
+          mkdir -p package_interactions
+          pip install -r requirements.txt -t package_interactions/ --platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 314
+          cp lambda_interactions.py config.py db.py survey_payload.py package_interactions/
+      - name: Create deployment zips
+        run: |
+          cd package_publish
+          zip -r ../publish-lambda-deployment.zip .
+          cd ../package_interactions
+          zip -r ../interactions-lambda-deployment.zip .
       - uses: actions/upload-artifact@v4
         with:
-          name: lambda-deployment
-          path: lambda-deployment.zip
+          name: lambda-deployments
+          path: |
+            publish-lambda-deployment.zip
+            interactions-lambda-deployment.zip
 
   deploy:
     name: Deploy to AWS Lambda
@@ -63,7 +72,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: lambda-deployment
+          name: lambda-deployments
           path: .
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -75,9 +84,9 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name "${{ secrets.LAMBDA_PUBLISH_FUNCTION_NAME }}" \
-            --zip-file fileb://lambda-deployment.zip
+            --zip-file fileb://publish-lambda-deployment.zip
       - name: Deploy interactions Lambda function
         run: |
           aws lambda update-function-code \
             --function-name "${{ secrets.LAMBDA_INTERACTIONS_FUNCTION_NAME }}" \
-            --zip-file fileb://lambda-deployment.zip
+            --zip-file fileb://interactions-lambda-deployment.zip
