@@ -24,45 +24,44 @@ class TestRegistrationDB(unittest.TestCase):
     def test_register_user_activities_add_and_delete(self):
         """Test registering user adding to selected and deleting from unselected zones."""
         user_id = 123456
-        # Select "Fire" and "Water"
         selected_zones = ["Fire", "Water"]
-        
-        self.db.register_user_activities(user_id, selected_zones)
-        
-        # Verify update_item calls
-        # Should call ADD for Fire, Water and DELETE for Earth, Wind, Whatever
+
+        with patch.object(RegistrationDB, "get_current_survey_date", return_value="29-06-2026"):
+            self.db.register_user_activities(user_id, selected_zones)
+
         self.assertEqual(self.mock_table.update_item.call_count, 5)
-        
-        # Build list of call arguments
+
         calls = self.mock_table.update_item.call_args_list
-        
+
         add_zones = []
         delete_zones = []
         for call in calls:
             kwargs = call.kwargs
+            self.assertEqual(kwargs['Key']['survey_date'], '29-06-2026')
             zone = kwargs['Key']['zone']
             expr = kwargs['UpdateExpression']
             self.assertEqual(kwargs['ExpressionAttributeValues'], {':u': {'123456'}})
-            
+
             if "ADD" in expr:
                 add_zones.append(zone)
             elif "DELETE" in expr:
                 delete_zones.append(zone)
-                
+
         self.assertEqual(sorted(add_zones), ["Fire", "Water"])
         self.assertEqual(sorted(delete_zones), ["Earth", "Whatever", "Wind"])
 
     def test_clear_user_registration(self):
         """Test clearing user registration removes from all zones."""
         user_id = 987654
-        self.db.clear_user_registration(user_id)
-        
+        with patch.object(RegistrationDB, "get_current_survey_date", return_value="29-06-2026"):
+            self.db.clear_user_registration(user_id)
+
         self.assertEqual(self.mock_table.update_item.call_count, 5)
-        
-        # All expressions should be DELETE
+
         calls = self.mock_table.update_item.call_args_list
         for call in calls:
             self.assertIn("DELETE", call.kwargs['UpdateExpression'])
+            self.assertEqual(call.kwargs['Key']['survey_date'], '29-06-2026')
 
     def test_get_zone_registrants_existing(self):
         """Test retrieving list of user IDs for a zone when it has data."""
@@ -72,21 +71,25 @@ class TestRegistrationDB(unittest.TestCase):
                 'users': {'123', '456'}
             }
         }
-        
-        registrants = self.db.get_zone_registrants('Fire')
+
+        with patch.object(RegistrationDB, "get_current_survey_date", return_value="29-06-2026"):
+            registrants = self.db.get_zone_registrants('Fire')
+
         self.assertEqual(registrants, ['123', '456'])
-        self.mock_table.get_item.assert_called_with(Key={'zone': 'Fire'})
+        self.mock_table.get_item.assert_called_with(Key={'survey_date': '29-06-2026', 'zone': 'Fire'})
 
     def test_get_zone_registrants_empty(self):
         """Test retrieving list of user IDs for a zone when there is no record."""
         self.mock_table.get_item.return_value = {}
-        
-        registrants = self.db.get_zone_registrants('Water')
+
+        with patch.object(RegistrationDB, "get_current_survey_date", return_value="29-06-2026"):
+            registrants = self.db.get_zone_registrants('Water')
+
         self.assertEqual(registrants, [])
+        self.mock_table.get_item.assert_called_with(Key={'survey_date': '29-06-2026', 'zone': 'Water'})
 
     def test_get_all_registrations(self):
         """Test aggregating registrations for all zones."""
-        # Setup mock behavior to return different users for different zones
         def mock_get_item(Key):
             zone = Key['zone']
             if zone == 'Fire':
@@ -95,11 +98,12 @@ class TestRegistrationDB(unittest.TestCase):
                 return {'Item': {'zone': 'Water', 'users': {'222', '333'}}}
             else:
                 return {}
-                
+
         self.mock_table.get_item.side_effect = mock_get_item
-        
-        all_regs = self.db.get_all_registrations()
-        
+
+        with patch.object(RegistrationDB, "get_current_survey_date", return_value="29-06-2026"):
+            all_regs = self.db.get_all_registrations()
+
         self.assertEqual(all_regs['Fire'], ['111'])
         self.assertEqual(all_regs['Water'], ['222', '333'])
         self.assertEqual(all_regs['Earth'], [])

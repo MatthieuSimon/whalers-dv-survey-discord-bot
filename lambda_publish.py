@@ -9,8 +9,8 @@ from survey_payload import build_survey_components, build_survey_embed
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
 
-def publish_survey_message(db: RegistrationDB) -> dict[str, object]:
-    embed = build_survey_embed(db.get_all_registrations())
+def publish_survey_message(db: RegistrationDB, survey_date: str) -> dict[str, object]:
+    embed = build_survey_embed(db.get_all_registrations(survey_date=survey_date), survey_date)
     payload = {
         "embeds": [embed],
         "components": build_survey_components(),
@@ -32,8 +32,9 @@ def publish_survey_message(db: RegistrationDB) -> dict[str, object]:
 def handler(event, context):
     config.validate_config()
     db = RegistrationDB()
+    survey_date = db.get_current_survey_date()
 
-    result = publish_survey_message(db)
+    result = publish_survey_message(db, survey_date)
 
     return {
         "statusCode": 200,

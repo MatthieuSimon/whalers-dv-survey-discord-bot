@@ -53,6 +53,7 @@ class TestLambdaInteractions(unittest.TestCase):
             "Wind": [],
             "Whatever": [],
         }
+        mock_db.get_current_survey_date.return_value = "30-06-2026"
         mock_db_class.return_value = mock_db
 
         interaction = {
@@ -76,6 +77,7 @@ class TestLambdaInteractions(unittest.TestCase):
         self.assertEqual(body["type"], 4)
         self.assertIn("✅ Your registration has been updated", body["data"]["content"])
         mock_patch.assert_called_once()
+        mock_db.get_all_registrations.assert_called_once_with(survey_date="30-06-2026")
 
 
 if __name__ == "__main__":

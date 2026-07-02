@@ -12,10 +12,11 @@ class TestSurveyPayload(unittest.TestCase):
             "Wind": [],
             "Whatever": [],
         }
+        survey_date = "30-06-2026"
 
-        embed = build_survey_embed(registrations)
+        embed = build_survey_embed(registrations, survey_date)
 
-        self.assertEqual(embed["title"], "Weekly Zone Registration Survey")
+        self.assertEqual(embed["title"], "Weekly Zone Registration Survey — 30-06-2026")
         self.assertEqual(len(embed["fields"]), 5)
         for field in embed["fields"]:
             self.assertIn("*No registrations yet*", field["value"])
@@ -28,9 +29,11 @@ class TestSurveyPayload(unittest.TestCase):
             "Wind": [],
             "Whatever": [],
         }
+        survey_date = "30-06-2026"
 
-        embed = build_survey_embed(registrations)
+        embed = build_survey_embed(registrations, survey_date)
 
+        self.assertEqual(embed["title"], "Weekly Zone Registration Survey — 30-06-2026")
         fire_field = embed["fields"][0]
         self.assertEqual(fire_field["name"], "🔥 Fire")
         self.assertIn("**Count:** 2", fire_field["value"])

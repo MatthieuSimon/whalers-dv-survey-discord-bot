@@ -105,7 +105,8 @@ def handler(event, context):
     if not message_id:
         return _response({"type": 4, "data": {"content": "Unable to update survey message.", "flags": 64}})
 
-    embed = build_survey_embed(db.get_all_registrations())
+    survey_date = db.get_current_survey_date()
+    embed = build_survey_embed(db.get_all_registrations(survey_date=survey_date), survey_date)
     _patch_message(channel_id, message_id, embed)
 
     return _response({"type": 4, "data": {"content": reply_text, "flags": 64}})

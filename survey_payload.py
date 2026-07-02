@@ -19,7 +19,7 @@ def format_zone_field(users: list[str]) -> str:
     return f"**Count:** {len(users)}\n**Registered:** {mentions_list}"
 
 
-def build_survey_embed(registrations: dict[str, list[str]]) -> dict[str, Any]:
+def build_survey_embed(registrations: dict[str, list[str]], survey_date: str) -> dict[str, Any]:
     fields = []
     for zone in VALID_ZONES:
         fields.append(
@@ -31,7 +31,7 @@ def build_survey_embed(registrations: dict[str, list[str]]) -> dict[str, Any]:
         )
 
     return {
-        "title": "Weekly Zone Registration Survey",
+        "title": f"Weekly Zone Registration Survey — {survey_date}",
         "description": "Select the zones you want to register for this week. You can choose multiple options from the dropdown below or clear your registration at any time.",
         "color": 0x5865F2,
         "fields": fields,
