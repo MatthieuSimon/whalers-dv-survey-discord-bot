@@ -11,15 +11,30 @@ EMOJI_MAP = {
 SURVEY_SELECT_CUSTOM_ID = "survey_select"
 
 
-def format_zone_field(users: list[str]) -> str:
-    if not users:
+def _normalize_user_id(user_id: Any) -> str:
+    normalized = str(user_id)
+    if isinstance(user_id, str) and normalized.startswith("<@") and normalized.endswith(">"):
+        normalized = normalized[2:-1]
+    return normalized
+
+
+def format_zone_field(user_priorities: list[str] | dict[str, int]) -> str:
+    if not user_priorities:
         return "*No registrations yet*"
 
-    mentions_list = ", ".join(f"<@{uid}>" for uid in users)
-    return f"**Count:** {len(users)}\n**Registered:** {mentions_list}"
+    if isinstance(user_priorities, dict):
+        ordered_users = sorted(user_priorities.items(), key=lambda pair: pair[1])
+    else:
+        ordered_users = [(user_id, index + 1) for index, user_id in enumerate(user_priorities)]
+
+    mentions_list = ", ".join(
+        f"<@{user_id}> ({priority})"
+        for user_id, priority in ordered_users
+    )
+    return f"**Count:** {len(ordered_users)}\n**Registered:** {mentions_list}"
 
 
-def build_survey_embed(registrations: dict[str, list[str]], survey_date: str) -> dict[str, Any]:
+def build_survey_embed(registrations: dict[str, list[str] | dict[str, int]], survey_date: str) -> dict[str, Any]:
     fields = []
     for zone in VALID_ZONES:
         fields.append(
