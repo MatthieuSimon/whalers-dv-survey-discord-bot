@@ -4,7 +4,7 @@ import requests
 
 import config
 from db import RegistrationDB
-from survey_payload import build_survey_components, build_survey_embed
+from survey_payload import build_survey_components, build_survey_embed, build_survey_message_content
 
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
@@ -12,8 +12,10 @@ DISCORD_API_BASE = "https://discord.com/api/v10"
 def publish_survey_message(db: RegistrationDB, survey_date: str) -> dict[str, object]:
     embed = build_survey_embed(db.get_all_registrations(survey_date=survey_date), survey_date)
     payload = {
+        "content": build_survey_message_content(survey_date),
         "embeds": [embed],
         "components": build_survey_components(),
+        "allowed_mentions": {"parse": ["roles"]},
     }
 
     response = requests.post(

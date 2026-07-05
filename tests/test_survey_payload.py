@@ -1,6 +1,6 @@
 import unittest
 
-from survey_payload import build_survey_components, build_survey_embed
+from survey_payload import build_survey_components, build_survey_embed, build_survey_message_content
 
 
 class TestSurveyPayload(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestSurveyPayload(unittest.TestCase):
 
         embed = build_survey_embed(registrations, survey_date)
 
-        self.assertEqual(embed["title"], "Weekly Zone Registration Survey — 30-06-2026")
+        self.assertEqual(embed["title"], "Choisissez votre zone pour cette semaine — 30-06-2026")
         self.assertEqual(len(embed["fields"]), 5)
         for field in embed["fields"]:
             self.assertIn("*No registrations yet*", field["value"])
@@ -33,7 +33,7 @@ class TestSurveyPayload(unittest.TestCase):
 
         embed = build_survey_embed(registrations, survey_date)
 
-        self.assertEqual(embed["title"], "Weekly Zone Registration Survey — 30-06-2026")
+        self.assertEqual(embed["title"], "Choisissez votre zone pour cette semaine — 30-06-2026")
         fire_field = embed["fields"][0]
         self.assertEqual(fire_field["name"], "🔥 Fire")
         self.assertIn("**Count:** 2", fire_field["value"])
@@ -63,6 +63,12 @@ class TestSurveyPayload(unittest.TestCase):
 
         water_field = embed["fields"][1]
         self.assertIn("<@789> (1)", water_field["value"])
+
+    def test_build_survey_message_content(self):
+        self.assertEqual(
+            build_survey_message_content("30-06-2026"),
+            "<@&1440069423913242624> choisissez votre zone pour cette semaine — 30-06-2026",
+        )
 
     def test_build_survey_components(self):
         components = build_survey_components()

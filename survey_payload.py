@@ -1,6 +1,7 @@
 from typing import Any
 
 VALID_ZONES = ["Fire", "Water", "Earth", "Wind", "Whatever"]
+SURVEY_ROLE_MENTION = "<@&1440069423913242624>"
 EMOJI_MAP = {
     "Fire": "🔥",
     "Water": "💧",
@@ -34,6 +35,10 @@ def format_zone_field(user_priorities: list[str] | dict[str, int]) -> str:
     return f"**Count:** {len(ordered_users)}\n**Registered:** {mentions_list}"
 
 
+def build_survey_message_content(survey_date: str) -> str:
+    return f"{SURVEY_ROLE_MENTION} choisissez votre zone pour cette semaine — {survey_date}"
+
+
 def build_survey_embed(registrations: dict[str, list[str] | dict[str, int]], survey_date: str) -> dict[str, Any]:
     fields = []
     for zone in VALID_ZONES:
@@ -46,28 +51,28 @@ def build_survey_embed(registrations: dict[str, list[str] | dict[str, int]], sur
         )
 
     return {
-        "title": f"Weekly Zone Registration Survey — {survey_date}",
-        "description": "Select the zones you want to register for this week. You can choose multiple options from the dropdown below or clear your registration at any time.",
+        "title": f"Choisissez votre zone pour cette semaine — {survey_date}",
+        "description": "Sélectionnez les zones pour lesquelles vous souhaitez vous inscrire cette semaine. Vous pouvez choisir plusieurs options dans le menu déroulant ci-dessous ou annuler votre inscription à tout moment.",
         "color": 0x5865F2,
         "fields": fields,
-        "footer": {"text": "Updates automatically. Ephemeral confirmations will be sent for your selections."},
+        "footer": {"text": "Mises à jour automatiquement. Des confirmations seront envoyées pour vos sélections."},
     }
 
 
 def build_survey_components() -> list[dict[str, Any]]:
     options = [
-        {"label": "Fire", "value": "Fire", "description": "Register for Fire zone", "emoji": {"name": "🔥"}},
-        {"label": "Water", "value": "Water", "description": "Register for Water zone", "emoji": {"name": "💧"}},
-        {"label": "Earth", "value": "Earth", "description": "Register for Earth zone", "emoji": {"name": "🪨"}},
-        {"label": "Wind", "value": "Wind", "description": "Register for Wind zone", "emoji": {"name": "💨"}},
-        {"label": "Whatever", "value": "Whatever", "description": "Register for Whatever (flexible)", "emoji": {"name": "🤷"}},
-        {"label": "Clear Registration", "value": "Clear", "description": "Clear all your registered zones", "emoji": {"name": "🗑️"}},
+        {"label": "Feu", "value": "Fire", "description": "S'inscrire à la zone Feu", "emoji": {"name": "🔥"}},
+        {"label": "Eau", "value": "Water", "description": "S'inscrire à la zone Eau", "emoji": {"name": "💧"}},
+        {"label": "Terre", "value": "Earth", "description": "S'inscrire à la zone Terre", "emoji": {"name": "🪨"}},
+        {"label": "Vent", "value": "Wind", "description": "S'inscrire à la zone Vent", "emoji": {"name": "💨"}},
+        {"label": "Peu importe", "value": "Whatever", "description": "S'inscrire à la zone Peu importe (flexible)", "emoji": {"name": "🤷"}},
+        {"label": "Effacer l'inscription", "value": "Clear", "description": "Effacer toutes vos inscriptions", "emoji": {"name": "🗑️"}},
     ]
 
     select = {
         "type": 3,
         "custom_id": SURVEY_SELECT_CUSTOM_ID,
-        "placeholder": "Choose your zone(s)...",
+        "placeholder": "Choisissez votre zone(s)...",
         "min_values": 1,
         "max_values": 6,
         "options": options,
